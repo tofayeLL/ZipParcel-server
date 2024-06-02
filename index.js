@@ -34,6 +34,19 @@ async function run() {
 
 
         // Users collection
+        // get for user role 
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
+            const query = { email: email }
+            const user = await userCollection.findOne(query);
+            // console.log(user)
+            res.send(user)
+        })
+
+
+
+        // post for Insert user info in database
         app.post('/users', async (req, res) => {
             const user = req.body;
             const query = { email: user.email }
