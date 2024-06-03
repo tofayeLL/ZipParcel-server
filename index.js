@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -67,6 +67,20 @@ async function run() {
         app.post('/bookedParcel', async (req, res) => {
             const parcel = req.body;
             const result = await bookingCollection.insertOne(parcel);
+            res.send(result);
+        })
+
+        // get all booking parcels from normal user My parcels page
+        app.get('/bookedParcel', async (req, res) => {
+            const result = await bookingCollection.find().toArray();
+            res.send(result);
+        })
+
+        // by Use Delete method delete booked parcel from normal user My parcel page
+        app.delete('/bookedParcel/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await bookingCollection.deleteOne(query);
             res.send(result);
         })
 
