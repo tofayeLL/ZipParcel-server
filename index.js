@@ -31,6 +31,7 @@ async function run() {
 
         // user collection
         const userCollection = client.db("ZipParcel").collection("users");
+        const bookingCollection = client.db("ZipParcel").collection("bookedParcel");
 
 
         // Users collection
@@ -57,6 +58,28 @@ async function run() {
             const result = await userCollection.insertOne(user);
             res.send(result);
         })
+
+
+
+
+        // Booked Parcel Related APis
+        // post method for insert Booked service form normal user menu
+        app.post('/bookedParcel', async (req, res) => {
+            const parcel = req.body;
+            const result = await bookingCollection.insertOne(parcel);
+            res.send(result);
+        })
+
+
+
+
+
+
+
+
+
+
+
 
 
 
