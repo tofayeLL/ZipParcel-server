@@ -143,6 +143,133 @@ async function run() {
 
 
 
+
+        // --------------Admin Routes apis--------------//
+        // All users page aggregation
+        app.get('/allParcels', async (req, res) => {
+            const result = await userCollection.aggregate([
+                /*   {
+                      $lookup: {
+                          from: 'bookedParcel',
+                          localField: 'name',
+                          foreignField: 'userName',
+                          as: 'parcels'
+                      }
+                  },
+                  {
+                      $project: {
+                          name: 1,
+                          email: 1,
+                          phone: 1, 
+                          userType: 1,
+                          parcel_count: { $size: '$parcels' }
+                      }
+                  } */
+
+
+                //   aggregation by use booking collection 
+                /* 
+                                {
+                                    $group: {
+                                        _id: "$userEmail",
+                                        totalParcels: { $sum: 1 },
+                                        totalAmount: { $sum: "$price" }
+                                    }
+                                },
+                                {
+                                    $lookup: {
+                                        from: "users",
+                                        localField: "_id",
+                                        foreignField: "email",
+                                        as: "userInfo"
+                                    }
+                                },
+                                {
+                                    $unwind: "$userInfo"
+                                },
+                                {
+                                    $project: {
+                                        _id: 0,
+                                        userName: "$userInfo.name",
+                                        userPhone: "$userInfo.phone",
+                                        totalParcels: 1,
+                                        totalAmount: 1
+                                    }
+                                } */
+
+
+                /* 
+                                 {
+                                     $lookup: {
+                                         from: "bookedParcel",
+                                         localField: "email",
+                                         foreignField: "userEmail",
+                                         as: "parcels"
+                                     }
+                                 },
+                                 {
+                                     $addFields: {
+                                         totalParcels: { $size: "$parcels" },
+                                         totalAmount: { $sum: "$parcels.price" }
+                                     }
+                                 },
+                                 {
+                                     $project: {
+                                         _id: 0,
+                                         userName: "$name",
+                                         userPhone: "$phone",
+                                         totalParcels: 1,
+                                         totalAmount: 1
+                                     }
+                                 } */
+
+
+                {
+                    $lookup: {
+                        from: "bookedParcel",
+                        localField: "email",
+                        foreignField: "userEmail",
+                        as: "parcels"
+                    }
+                },
+                {
+                    $addFields: {
+                        totalParcels: { $size: "$parcels" },
+                        totalAmount: { $sum: "$parcels.price" }
+                    }
+                },
+                {
+                    $group: {
+                        _id: { name: "$name", phone: "$phone" },
+                        totalParcels: { $first: "$totalParcels" },
+                        totalAmount: { $first: "$totalAmount" }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        userName: "$_id.name",
+                        userPhone: "$_id.phone",
+                        totalParcels: 1,
+                        totalAmount: 1
+                    }
+                },
+                {
+                    $sort: { "userName": 1 }
+                }
+
+
+            ]).toArray();
+
+
+            res.send(result);
+        }
+        )
+
+
+
+
+
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
