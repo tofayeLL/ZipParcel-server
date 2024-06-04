@@ -34,17 +34,16 @@ async function run() {
         const bookingCollection = client.db("ZipParcel").collection("bookedParcel");
 
 
-        // Users collection
+        // ----------------Users collection------------------
         // get for user role 
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email)
+            // console.log(email)
             const query = { email: email }
             const user = await userCollection.findOne(query);
             // console.log(user)
             res.send(user)
         })
-
 
 
         // post for Insert user info in database
@@ -62,7 +61,10 @@ async function run() {
 
 
 
-        // Booked Parcel Related APis
+        //-----------------------Booking Collection  Booked Parcel Related APis----------------
+
+
+
         // post method for insert Booked service form normal user menu
         app.post('/bookedParcel', async (req, res) => {
             const parcel = req.body;
@@ -76,22 +78,59 @@ async function run() {
             res.send(result);
         })
 
-        // by Use Delete method delete booked parcel from normal user My parcel page
-        app.delete('/bookedParcel/:id', async (req, res) => {
+
+
+        // By use get method to find single data from database
+        app.get('/bookedParcel/:id', async (req, res) => {
             const id = req.params.id;
-            const query = { _id: new ObjectId(id) }
-            const result = await bookingCollection.deleteOne(query);
+            const query = { _id: new ObjectId(id) };
+            const result = await bookingCollection.findOne(query);
             res.send(result);
+        })
+
+        // by use patch update Booked parcel info
+        app.patch('/bookedParcel/:id', async (req, res) => {
+            const item = req.body;
+            const id = req.params.id;
+            console.log(item, id);
+            const filter = { _id: new ObjectId(id) };
+            const updateDoc = {
+                $set: {
+                    userPhone: item.userPhone,
+                    parcelType: item.parcelType,
+                    parcelWeight: item.parcelWeight,
+                    deliveryAddress: item.deliveryAddress,
+                    requestedDate: item.requestedDate,
+                    latitudes: item.latitudes,
+                    longitude: item.longitude,
+                    price: item.price,
+                    receiverName: item.receiverName,
+                    receiverPhone: item.receiverPhone,
+                }
+            }
+
+            const result = await bookingCollection.updateOne(filter, updateDoc);
+            res.send(result);
+
+
         })
 
 
 
-
-
-
-
-
-
+        // by Use Delete method delete booked parcel from normal user My parcel page
+        app.patch('/cancelParcel/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body;
+            console.log(status, id)
+            const query = { _id: new ObjectId(id) }
+            const updateStatus = {
+                $set: {
+                  status: status.status
+                },
+            };
+            const result = await bookingCollection.updateOne(query, updateStatus);
+            res.send(result);
+        })
 
 
 
