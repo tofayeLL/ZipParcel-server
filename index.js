@@ -63,6 +63,11 @@ async function run() {
 
         //-----------------------Booking Collection  Booked Parcel Related APis----------------
 
+        // by use get All book parcels find
+        app.get('/bookedParcel', async (req, res) => {
+            const result = await bookingCollection.find().toArray();
+            res.send(result);
+        })
 
 
         // post method for insert Booked service form normal user menu
@@ -73,15 +78,17 @@ async function run() {
         })
 
         // get all booking parcels from normal user My parcels page
-        app.get('/bookedParcel', async (req, res) => {
-            const result = await bookingCollection.find().toArray();
+        app.get('/bookedParcel/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { userEmail: email }
+            const result = await bookingCollection.find(query).toArray();
             res.send(result);
         })
 
 
 
         // By use get method to find single data from database
-        app.get('/bookedParcel/:id', async (req, res) => {
+        app.get('/updateParcel/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await bookingCollection.findOne(query);
@@ -117,7 +124,7 @@ async function run() {
 
 
 
-        // by Use Delete method delete booked parcel from normal user My parcel page
+        // by Use patch method cancel booked parcel status from normal user My parcel page
         app.patch('/cancelParcel/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body;
@@ -125,7 +132,7 @@ async function run() {
             const query = { _id: new ObjectId(id) }
             const updateStatus = {
                 $set: {
-                  status: status.status
+                    status: status.status
                 },
             };
             const result = await bookingCollection.updateOne(query, updateStatus);
