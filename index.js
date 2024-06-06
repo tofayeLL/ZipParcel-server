@@ -306,7 +306,7 @@ async function run() {
 
 
 
-        // by use Patch method change user Type from admin all users page 
+        // by use Patch method change or update user Type to deliverymen from admin all users page 
         app.patch('/makeDeliveryMen/:email', async (req, res) => {
             const email = req.params.email;
             console.log(email);
@@ -314,6 +314,21 @@ async function run() {
             const updateDoc = {
                 $set: {
                     userType: 'DeliveryMen'
+                },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
+            res.send(result);
+        })
+
+        
+        // by use Patch method change or update user Type to Admin from admin all users page 
+        app.patch('/makeAdmin/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const filter = { email: email }
+            const updateDoc = {
+                $set: {
+                    userType: 'Admin'
                 },
             };
             const result = await userCollection.updateOne(filter, updateDoc);
