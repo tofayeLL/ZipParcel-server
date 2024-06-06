@@ -359,8 +359,24 @@ async function run() {
             res.send(result);
         })
 
-        // by use patch method cancel delivery from delivery Dashboard
+        // by use patch method (update status) cancel  from delivery Dashboard
         app.patch('/cancelDelivery/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body;
+            console.log(status, id)
+            const query = { _id: new ObjectId(id) }
+            const updateStatus = {
+                $set: {
+                    status: status.status
+                },
+            };
+            const result = await bookingCollection.updateOne(query, updateStatus);
+            res.send(result);
+        })
+
+
+        // by use patch method (update status) deliver  from delivery Dashboard
+        app.patch('/deliverParcel/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body;
             console.log(status, id)
