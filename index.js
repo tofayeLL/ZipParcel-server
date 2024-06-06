@@ -240,7 +240,7 @@ async function run() {
                 },
                 {
                     $group: {
-                        _id: { name: "$name", phone: "$phone", email: "$email" },
+                        _id: { name: "$name", phone: "$phone", email: "$email", userType: "$userType" },
                         totalParcels: { $first: "$totalParcels" },
                         totalAmount: { $first: "$totalAmount" }
                     }
@@ -252,6 +252,7 @@ async function run() {
                         userName: "$_id.name",
                         userPhone: "$_id.phone",
                         userEmail: "$_id.email",
+                        userType: "$_id.userType",
 
                         totalParcels: 1,
                         totalAmount: 1
@@ -300,6 +301,22 @@ async function run() {
                 }
             }).toArray();
             // console.log(result)
+            res.send(result);
+        })
+
+
+
+        // by use Patch method change user Type from admin all users page 
+        app.patch('/makeDeliveryMen/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email);
+            const filter = { email: email }
+            const updateDoc = {
+                $set: {
+                    userType: 'DeliveryMen'
+                },
+            };
+            const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
 
