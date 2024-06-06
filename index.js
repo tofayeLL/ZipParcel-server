@@ -320,7 +320,7 @@ async function run() {
             res.send(result);
         })
 
-        
+
         // by use Patch method change or update user Type to Admin from admin all users page 
         app.patch('/makeAdmin/:email', async (req, res) => {
             const email = req.params.email;
@@ -343,12 +343,37 @@ async function run() {
 
 
         // ---------------Delivery Mens related apis------------------//
+
         // by use get method get from delivery men from all user collection
         app.get('/deliveryMen', async (req, res) => {
             const result = await userCollection.find({ userType: "DeliveryMen" }).toArray();
             res.send(result);
 
         })
+
+        // by ue Get method get all deliveries by in logged in deliverymen for mY delivery list page
+        app.get('/myDeliveries/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { deliveryMenID: id };
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result);
+        })
+
+        // by use patch method cancel delivery from delivery Dashboard
+        app.patch('/cancelDelivery/:id', async (req, res) => {
+            const id = req.params.id;
+            const status = req.body;
+            console.log(status, id)
+            const query = { _id: new ObjectId(id) }
+            const updateStatus = {
+                $set: {
+                    status: status.status
+                },
+            };
+            const result = await bookingCollection.updateOne(query, updateStatus);
+            res.send(result);
+        })
+
 
 
 
