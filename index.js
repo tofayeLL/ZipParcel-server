@@ -289,6 +289,21 @@ async function run() {
         })
 
 
+        // implement search depends on parcel request date by use post Method for admin menu
+        app.post('/search', async (req, res) => {
+            const { dateFrom, dateTo } = req.body;
+            // console.log(dateFrom, dateTo)
+            const result = await bookingCollection.find({
+                requestedDate: {
+                    $gte: dateFrom,
+                    $lte: dateTo
+                }
+            }).toArray();
+            // console.log(result)
+            res.send(result);
+        })
+
+
 
 
 
