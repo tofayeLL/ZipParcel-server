@@ -240,7 +240,7 @@ async function run() {
                 },
                 {
                     $group: {
-                        _id: { name: "$name", phone: "$phone" },
+                        _id: { name: "$name", phone: "$phone", email: "$email" },
                         totalParcels: { $first: "$totalParcels" },
                         totalAmount: { $first: "$totalAmount" }
                     }
@@ -248,8 +248,11 @@ async function run() {
                 {
                     $project: {
                         _id: 0,
+
                         userName: "$_id.name",
                         userPhone: "$_id.phone",
+                        userEmail: "$_id.email",
+
                         totalParcels: 1,
                         totalAmount: 1
                     }
@@ -258,14 +261,47 @@ async function run() {
                     $sort: { "userName": 1 }
                 }
 
-
             ]).toArray();
-
-
             res.send(result);
         }
         )
 
+
+
+
+        // use put method for Admin menus modal from All parcels page manage  form page
+        app.put('/manageBooked/:id', async (req, res) => {
+            const id = req.params.id;
+            const updateBookedInfo = req.body;
+            const filter = { _id: new ObjectId(id) };
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    approximateDate: updateBookedInfo.approximateDate,
+                    deliveryMenID: updateBookedInfo.deliveryMenID,
+                    status: updateBookedInfo.status
+                },
+            };
+
+            const result = await bookingCollection.updateOne(filter, updateDoc, options);
+            res.send(result);
+
+        })
+
+
+
+
+
+
+
+
+        // ---------------Delivery Mens related apis------------------//
+        // by use get method get from delivery men from all user collection
+        app.get('/deliveryMen', async (req, res) => {
+            const result = await userCollection.find({ userType: "DeliveryMen" }).toArray();
+            res.send(result);
+
+        })
 
 
 
