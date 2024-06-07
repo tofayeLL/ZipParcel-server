@@ -105,7 +105,7 @@ async function run() {
             const result = await bookingCollection.findOne(query);
             res.send(result);
         })
-        
+
 
         // by use patch update Booked parcel info
         app.patch('/bookedParcel/:id', async (req, res) => {
@@ -431,6 +431,75 @@ async function run() {
             // console.log(updateResult);
             res.send(updateResult)
         })
+
+
+
+
+
+
+
+        // -------Reviews collection apis----------------//
+
+        // Get method for get All reviews from logged in delivery man
+        app.get('/myReviews/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id);
+            const query = { deliveryMenID: id };
+            const result = await reviewCollection.find(query).toArray();
+            res.send(result)
+        })
+
+
+
+        // Post method for average all the reviews and set it to the user collection depends on deliverymen Id  when click review button and open modal then it will happen 
+        app.post('/reviewAverage/:id', async (req, res) => {
+            const deliveryMenID = req.params.id;
+            console.log(deliveryMenID)
+            const averageRating = await reviewCollection.aggregate([
+                { $match: { deliveryMenID } },
+                {
+                    $group: {
+                        _id: "$deliveryMenID",
+                        averageRating: { $avg: "$rating" }
+                    }
+                },
+                {
+                    $project: {
+                        averageRating: { $round: ["$averageRating", 2] },
+                        _id: 0
+                    }
+                }
+            ]).toArray();
+
+            if (averageRating.length === 0) {
+                return res.status(404).json({ message: "No reviews found for this delivery man." });
+            }
+
+
+            // Update the user collection with the calculated average rating
+            const result = await userCollection.updateOne(
+                { _id: new ObjectId(deliveryMenID) },
+                { $set: { ratingAverage: averageRating[0].averageRating } }
+            );
+
+            res.send(result)
+        })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
