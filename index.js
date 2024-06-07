@@ -392,6 +392,24 @@ async function run() {
 
 
 
+        // By use post method count delivery by click delivered button from deliveryman page
+        app.post('/deliveryCount/:id', async (req, res) => {
+            const id = req.params.id;
+            // console.log(id)
+            const updateResult = await userCollection.updateOne(
+                { _id: new ObjectId(id) },
+                { $inc: { delivered: 1 } },
+                { upsert: true }
+            );
+            /*  if (updateResult.modifiedCount === 0 && updateResult.upsertedCount === 0) {
+                 return res.status(500).send({ message: 'Failed to update delivery count' });
+             } */
+            // console.log(updateResult);
+            res.send(updateResult)
+        })
+
+
+
 
 
         // Send a ping to confirm a successful connection
