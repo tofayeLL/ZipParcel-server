@@ -32,6 +32,7 @@ async function run() {
         // user collection
         const userCollection = client.db("ZipParcel").collection("users");
         const bookingCollection = client.db("ZipParcel").collection("bookedParcel");
+        const reviewCollection = client.db("ZipParcel").collection("reviews");
 
 
         // ----------------Users collection------------------
@@ -77,6 +78,16 @@ async function run() {
             res.send(result);
         })
 
+
+
+        // By use POst method store review data get from user and store it in review collection
+        app.post('/userReview', async (req, res) => {
+            const parcel = req.body;
+            const result = await reviewCollection.insertOne(parcel);
+            res.send(result);
+        })
+
+
         // get all booking parcels from normal user My parcels page
         app.get('/bookedParcel/:email', async (req, res) => {
             const email = req.params.email;
@@ -94,6 +105,7 @@ async function run() {
             const result = await bookingCollection.findOne(query);
             res.send(result);
         })
+        
 
         // by use patch update Booked parcel info
         app.patch('/bookedParcel/:id', async (req, res) => {
@@ -121,6 +133,18 @@ async function run() {
 
 
         })
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
