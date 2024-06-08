@@ -47,6 +47,19 @@ async function run() {
         })
 
 
+
+        // GET by use get method get top 3 delivery men depends on their delivered count
+        app.get('/topDelivered', async (req, res) => {
+            const result = await userCollection.find({ userType: "DeliveryMen" })
+                .sort({ delivered: -1 })
+                .limit(3)
+                .toArray();
+            res.send(result);
+
+        })
+
+
+
         // post for Insert user info in database
         app.post('/users', async (req, res) => {
             const user = req.body;
@@ -136,18 +149,6 @@ async function run() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
         // by Use patch method cancel booked parcel status from normal user My parcel page
         app.patch('/cancelParcel/:id', async (req, res) => {
             const id = req.params.id;
@@ -169,6 +170,7 @@ async function run() {
 
 
         // --------------Admin Routes apis--------------//
+
         // All users page aggregation
         app.get('/allParcels', async (req, res) => {
             const result = await userCollection.aggregate([
@@ -448,7 +450,6 @@ async function run() {
             const result = await reviewCollection.find(query).toArray();
             res.send(result)
         })
-
 
 
         // Post method for average all the reviews and set it to the user collection depends on deliverymen Id  when click review button and open modal then it will happen 
