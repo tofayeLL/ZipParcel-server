@@ -27,7 +27,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
+        // await client.connect();
 
         // user collection
         const userCollection = client.db("ZipParcel").collection("users");
@@ -36,6 +36,7 @@ async function run() {
 
 
         // ----------------Users collection------------------
+
         // get for user role 
         app.get('/user/:email', async (req, res) => {
             const email = req.params.email;
@@ -56,6 +57,24 @@ async function run() {
                 .toArray();
             res.send(result);
 
+        })
+
+        // GET by use get method get total delivery for all delivery men depends on their delivered count
+        app.get('/totalDelivered', async (req, res) => {
+            const result = await userCollection.aggregate([
+                { $match: { userType: "DeliveryMen" } },
+                { $group: { _id: null, totalDelivered: { $sum: "$delivered" } } }
+
+            ]).toArray()
+            res.send(result);
+
+        })
+
+
+        // Get by use get method send total register users count from database userCollection
+        app.get('/totalRegisterUser', async (req, res) => {
+            const bookingCount = await userCollection.countDocuments();
+            res.send({ count: bookingCount });
         })
 
 
@@ -81,6 +100,17 @@ async function run() {
         app.get('/bookedParcel', async (req, res) => {
             const result = await bookingCollection.find().toArray();
             res.send(result);
+        })
+        // by use get All book parcels find
+        app.get('/bookingsDate', async (req, res) => {
+            const result = await bookingCollection.find({}, { projection: { bookingDate: 1, _id: 0 } }).toArray();
+            res.send(result);
+        })
+
+        // by use get count all booking collection data and send to client
+        app.get('/totalParcelBooked', async (req, res) => {
+            const bookingCount = await bookingCollection.countDocuments();
+            res.send({ count: bookingCount });
         })
 
 
@@ -124,7 +154,7 @@ async function run() {
         app.patch('/bookedParcel/:id', async (req, res) => {
             const item = req.body;
             const id = req.params.id;
-            console.log(item, id);
+            // console.log(item, id);
             const filter = { _id: new ObjectId(id) };
             const updateDoc = {
                 $set: {
@@ -174,82 +204,6 @@ async function run() {
         // All users page aggregation
         app.get('/allParcels', async (req, res) => {
             const result = await userCollection.aggregate([
-                /*   {
-                      $lookup: {
-                          from: 'bookedParcel',
-                          localField: 'name',
-                          foreignField: 'userName',
-                          as: 'parcels'
-                      }
-                  },
-                  {
-                      $project: {
-                          name: 1,
-                          email: 1,
-                          phone: 1, 
-                          userType: 1,
-                          parcel_count: { $size: '$parcels' }
-                      }
-                  } */
-
-
-                //   aggregation by use booking collection 
-                /* 
-                                {
-                                    $group: {
-                                        _id: "$userEmail",
-                                        totalParcels: { $sum: 1 },
-                                        totalAmount: { $sum: "$price" }
-                                    }
-                                },
-                                {
-                                    $lookup: {
-                                        from: "users",
-                                        localField: "_id",
-                                        foreignField: "email",
-                                        as: "userInfo"
-                                    }
-                                },
-                                {
-                                    $unwind: "$userInfo"
-                                },
-                                {
-                                    $project: {
-                                        _id: 0,
-                                        userName: "$userInfo.name",
-                                        userPhone: "$userInfo.phone",
-                                        totalParcels: 1,
-                                        totalAmount: 1
-                                    }
-                                } */
-
-
-                /* 
-                                 {
-                                     $lookup: {
-                                         from: "bookedParcel",
-                                         localField: "email",
-                                         foreignField: "userEmail",
-                                         as: "parcels"
-                                     }
-                                 },
-                                 {
-                                     $addFields: {
-                                         totalParcels: { $size: "$parcels" },
-                                         totalAmount: { $sum: "$parcels.price" }
-                                     }
-                                 },
-                                 {
-                                     $project: {
-                                         _id: 0,
-                                         userName: "$name",
-                                         userPhone: "$phone",
-                                         totalParcels: 1,
-                                         totalAmount: 1
-                                     }
-                                 } */
-
-
                 {
                     $lookup: {
                         from: "bookedParcel",
@@ -335,7 +289,7 @@ async function run() {
         // by use Patch method change or update user Type to deliverymen from admin all users page 
         app.patch('/makeDeliveryMen/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
+            // console.log(email);
             const filter = { email: email }
             const updateDoc = {
                 $set: {
@@ -350,7 +304,7 @@ async function run() {
         // by use Patch method change or update user Type to Admin from admin all users page 
         app.patch('/makeAdmin/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email);
+            // console.log(email);
             const filter = { email: email }
             const updateDoc = {
                 $set: {
@@ -360,10 +314,6 @@ async function run() {
             const result = await userCollection.updateOne(filter, updateDoc);
             res.send(result);
         })
-
-
-
-
 
 
 
@@ -389,7 +339,7 @@ async function run() {
         app.patch('/cancelDelivery/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body;
-            console.log(status, id)
+            // console.log(status, id)
             const query = { _id: new ObjectId(id) }
             const updateStatus = {
                 $set: {
@@ -405,7 +355,7 @@ async function run() {
         app.patch('/deliverParcel/:id', async (req, res) => {
             const id = req.params.id;
             const status = req.body;
-            console.log(status, id)
+            // console.log(status, id)
             const query = { _id: new ObjectId(id) }
             const updateStatus = {
                 $set: {
@@ -427,9 +377,7 @@ async function run() {
                 { $inc: { delivered: 1 } },
                 { upsert: true }
             );
-            /*  if (updateResult.modifiedCount === 0 && updateResult.upsertedCount === 0) {
-                 return res.status(500).send({ message: 'Failed to update delivery count' });
-             } */
+          
             // console.log(updateResult);
             res.send(updateResult)
         })
@@ -445,7 +393,7 @@ async function run() {
         // Get method for get All reviews from logged in delivery man
         app.get('/myReviews/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id);
+            // console.log(id);
             const query = { deliveryMenID: id };
             const result = await reviewCollection.find(query).toArray();
             res.send(result)
@@ -455,7 +403,7 @@ async function run() {
         // Post method for average all the reviews and set it to the user collection depends on deliverymen Id  when click review button and open modal then it will happen 
         app.post('/reviewAverage/:id', async (req, res) => {
             const deliveryMenID = req.params.id;
-            console.log(deliveryMenID)
+            // console.log(deliveryMenID)
             const averageRating = await reviewCollection.aggregate([
                 { $match: { deliveryMenID } },
                 {
@@ -493,21 +441,8 @@ async function run() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
         // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
     } finally {
         // Ensures that the client will close when you finish/error
